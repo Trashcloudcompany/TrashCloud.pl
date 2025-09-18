@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrashCloud - Technology</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f0f0f0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            line-height: 1.6;
+        }
+
+        /* Wzór w tle - subtelne linie */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Back button in top left */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            padding: 12px 25px 12px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 0 25px 25px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateX(-100%);
+            animation: slideInFromLeft 1s ease 0.6s forwards;
+        }
+
+        .back-button:hover {
+            transform: translateX(0) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #9CCC65, #7CB342);
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Language switcher in top right - konsystentny z główną stroną */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 0.8s ease 0.8s;
+            cursor: pointer;
+            z-index: 30;
+        }
+
+        .language-switcher.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .flag {
+            width: 40px;
+            height: 26px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .flag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .flag.uk {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Crect width='60' height='30' fill='%23012169'/%3E%3Cg stroke='%23fff'%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke-width='6'/%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke='%23C8102E' stroke-width='2'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='m30,0v30M0,15h60' stroke-width='10'/%3E%3Cpath d='m30,0v30M0,15h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .flag.pl {
+            background: linear-gradient(to bottom, #fff 50%, #DC143C 50%);
+        }
+
+        /* Main content */
+        .technology-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 1s ease 0.2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        .intro-text {
+            font-size: 18px;
+            color: #444;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(104, 159, 56, 0.1));
+            border-radius: 15px;
+            border-left: 5px solid #8BC34A;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 40px 0 25px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #8BC34A;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .characteristic-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #8BC34A;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .characteristic-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-left-color: #689F38;
+        }
+
+        .characteristic-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #8BC34A, #689F38);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .characteristic-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .characteristic-item strong {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .process-steps {
+            margin: 30px 0;
+        }
+
+        .process-step {
+            background: rgba(255, 255, 255, 0.9);
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            position: relative;
+            border-left: 6px solid #8BC34A;
+            transition: all 0.4s ease;
+        }
+
+        .process-step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .step-number {
+            position: absolute;
+            left: -15px;
+            top: -10px;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .step-content {
+            font-size: 16px;
+            color: #444;
+            margin-left: 15px;
+        }
+
+        /* AI and Camera Integration Section */
+        .ai-section {
+            background: linear-gradient(135deg, rgba(139, 195, 74, 0.15), rgba(104, 159, 56, 0.1));
+            padding: 30px;
+            border-radius: 20px;
+            margin: 40px 0;
+            border: 2px solid rgba(139, 195, 74, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 195, 74, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .tech-highlight {
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Floating elements */
+        .floating-tech {
+            position: absolute;
+            background: rgba(139, 195, 74, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-tech:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 10%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-tech:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            bottom: 15%;
+            left: 5%;
+            animation-delay: 3s;
+        }
+
+        .floating-tech:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 20%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(-10px) rotate(240deg);
+            }
+        }
+
+        /* Language transition effects */
+        .language-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .language-transition.fade-out {
+            opacity: 0;
+        }
+
+        .no-transitions, .no-transitions * {
+            transition: none !important;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 60px 15px 20px;
+            }
+
+            .technology-content {
+                padding: 25px;
+                margin-top: 20px;
+            }
+
+            .page-title {
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+
+            .intro-text {
+                font-size: 16px;
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 24px;
+                margin: 30px 0 20px 0;
+            }
+
+            .characteristics-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .characteristic-item {
+                padding: 15px;
+            }
+
+            .process-step {
+                padding: 20px;
+                margin: 15px 0;
+            }
+
+            .step-content {
+                font-size: 15px;
+                margin-left: 10px;
+            }
+
+            .floating-tech {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating decorative elements -->
+        <div class="floating-tech"></div>
+        <div class="floating-tech"></div>
+        <div class="floating-tech"></div>
+
+        <!-- Back button -->
+        <a href="index.html" class="back-button" 
+           data-en="Back to Home" 
+           data-pl="Powrót do strony głównej">Powrót do strony głównej</a>
+
+        <!-- Language switcher -->
+        <div class="language-switcher" id="languageSwitcher">
+            <div class="flag uk" id="languageFlag"></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="technology-content">
+            <h1 class="page-title" data-en="Technology" data-pl="Technologia">Technologia</h1>
+            
+            <div class="intro-text" 
+                 data-en="TrashCloud is a project focused on intelligent recognition of useful waste in urban spaces and providing users with organized information about them. Currently, work is concentrated on building solid technical foundations and a reliable mobile application."
+                 data-pl="TrashCloud to projekt skupiony na inteligentnym rozpoznawaniu użytecznych odpadów w przestrzeniach miejskich i zapewnieniu użytkownikom uporządkowanych informacji o nich. Obecnie prace koncentrują się na budowie solidnych fundamentów technicznych oraz niezawodnej aplikacji mobilnej.">
+                <strong>TrashCloud to projekt skupiony na inteligentnym rozpoznawaniu użytecznych odpadów w przestrzeniach miejskich i zapewnieniu użytkownikom uporządkowanych informacji o nich. Obecnie prace koncentrują się na budowie solidnych fundamentów technicznych oraz niezawodnej aplikacji mobilnej.</strong>
+            </div>
+
+            <h2 class="section-title" data-en="MAIN CHARACTERISTICS:" data-pl="GŁÓWNE CECHY:">GŁÓWNE CECHY:</h2>
+            <div class="characteristics-grid">
+                <div class="characteristic-item">
+                    <strong data-en="Analysis of waste photos based on artificial intelligence" data-pl="Analiza zdjęć odpadów w oparciu o sztuczną inteligencję">Analiza zdjęć odpadów w oparciu o sztuczną inteligencję</strong>
+                </div>
+                <div class="characteristic-item">
+                    <strong data-en="Automatic tagging and categorization of recognized objects" data-pl="Automatyczne tagowanie i kategoryzacja rozpoznanych obiektów">Automatyczne tagowanie i kategoryzacja rozpoznanych obiektów</strong>
+                </div>
+                <div class="characteristic-item">
+                    <strong data-en="Storage of results along with location metadata" data-pl="Przechowywanie wyników wraz z metadanymi lokalizacji">Przechowywanie wyników wraz z metadanymi lokalizacji</strong>
+                </div>
+                <div class="characteristic-item">
+                    <strong data-en="Access to results through a dedicated mobile application" data-pl="Dostęp do wyników przez dedykowaną aplikację mobilną">Dostęp do wyników przez dedykowaną aplikację mobilną</strong>
+                </div>
+            </div>
+
+            <h2 class="section-title" data-en="OPERATION PROCESS:" data-pl="PROCES DZIAŁANIA:">PROCES DZIAŁANIA:</h2>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong data-en="Photos of waste come from cameras at collection points or from users." data-pl="Zdjęcia odpadów pochodzą z kamer w punktach zbiórki lub od użytkowników.">Zdjęcia odpadów pochodzą z kamer w punktach zbiórki lub od użytkowników.</strong>
+                    </div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong data-en="The image is analyzed by an AI model." data-pl="Obraz jest analizowany przez model AI.">Obraz jest analizowany przez model AI.</strong>
+                    </div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong data-en="Recognized objects are automatically tagged and categorized." data-pl="Rozpoznane obiekty są automatycznie tagowane i kategoryzowane.">Rozpoznane obiekty są automatycznie tagowane i kategoryzowane.</strong>
+                    </div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <strong data-en="Data is stored in the system along with appropriate location metadata." data-pl="Dane są przechowywane w systemie wraz z odpowiednimi metadanymi lokalizacji.">Dane są przechowywane w systemie wraz z odpowiednimi metadanymi lokalizacji.</strong>
+                    </div>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <strong data-en="Results are displayed to the user in the mobile application." data-pl="Wyniki są wyświetlane użytkownikowi w aplikacji mobilnej.">Wyniki są wyświetlane użytkownikowi w aplikacji mobilnej.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globalna zmienna języka - synchronizacja z localStorage
+        let currentLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+
+        // Przełączanie języka
+        function switchLanguage() {
+            const container = document.querySelector('.container');
+            const flag = document.getElementById('languageFlag');
+            
+            container.classList.add('language-transition', 'fade-out');
+            
+            setTimeout(() => {
+                // Przełącz język
+                currentLanguage = currentLanguage === 'pl' ? 'en' : 'pl';
+                
+                // Zapisz język w localStorage
+                localStorage.setItem('trashcloud-language', currentLanguage);
+                
+                // Ustaw flagę - gdy język polski, pokaż flagę UK
+                if (currentLanguage === 'pl') {
+                    flag.className = 'flag uk';
+                    document.documentElement.lang = 'pl';
+                } else {
+                    flag.className = 'flag pl';
+                    document.documentElement.lang = 'en';
+                }
+                
+                updateTexts();
+                
+                setTimeout(() => {
+                    container.classList.remove('fade-out');
+                }, 50);
+            }, 300);
+            
+            setTimeout(() => {
+                container.classList.remove('language-transition');
+            }, 1200);
+        }
+
+        // Aktualizacja tekstów
+        function updateTexts() {
+            const elementsWithData = document.querySelectorAll('[data-en][data-pl]');
+            
+            elementsWithData.forEach(element => {
+                const key = currentLanguage === 'en' ? 'data-en' : 'data-pl';
+                if (element.hasAttribute(key)) {
+                    element.textContent = element.getAttribute(key);
+                }
+            });
+        }
+
+        // Parallax effect for background
+        function initParallax() {
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                
+                document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+            });
+        }
+
+        // Add hover effects to floating elements
+        function initFloatingElements() {
+            const floatingElements = document.querySelectorAll('.floating-tech');
+            
+            document.addEventListener('mousemove', (e) => {
+                floatingElements.forEach((element, index) => {
+                    const rect = element.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    const deltaX = e.clientX - centerX;
+                    const deltaY = e.clientY - centerY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (distance < 150) {
+                        const moveX = (deltaX / distance) * -10;
+                        const moveY = (deltaY / distance) * -10;
+                        element.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    } else {
+                        element.style.transform = 'translate(0, 0)';
+                    }
+                });
+            });
+        }
+
+        // Smooth scroll animations for process steps
+        function initScrollAnimations() {
+            const processSteps = document.querySelectorAll('.process-step');
+            const characteristics = document.querySelectorAll('.characteristic-item');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            [...processSteps, ...characteristics].forEach(step => {
+                step.style.opacity = '0';
+                step.style.transform = 'translateY(30px)';
+                step.style.transition = 'all 0.6s ease';
+                observer.observe(step);
+            });
+        }
+
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pobierz zapisany język z localStorage
+            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+            currentLanguage = savedLanguage;
+            
+            // Ustaw flagę zgodnie z aktualnym językiem
+            const flag = document.getElementById('languageFlag');
+            if (currentLanguage === 'pl') {
+                flag.className = 'flag uk';
+                document.documentElement.lang = 'pl';
+            } else {
+                flag.className = 'flag pl';
+                document.documentElement.lang = 'en';
+                updateTexts();
+            }
+
+            initParallax();
+            initFloatingElements();
+            initScrollAnimations();
+            
+            // Obsługa przełączania języka
+            document.getElementById('languageSwitcher').addEventListener('click', switchLanguage);
+            
+            // Start animacji po załadowaniu
+            setTimeout(() => {
+                document.querySelector('.language-switcher').classList.add('animate-in');
+            }, 800);
+        });
+
+        // Synchronizacja języka przy powrocie
+        window.addEventListener('pageshow', (event) => {
+            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+            if (savedLanguage !== currentLanguage) {
+                currentLanguage = savedLanguage;
+                const flag = document.getElementById('languageFlag');
+                
+                if (currentLanguage === 'pl') {
+                    flag.className = 'flag uk';
+                    document.documentElement.lang = 'pl';
+                } else {
+                    flag.className = 'flag pl';
+                    document.documentElement.lang = 'en';
+                }
+                updateTexts();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrashCloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #e0e0e0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+        }
+
+        /* Wzór w tle - subtelne linie */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 100vw;
+            margin: 0;
+            padding: 20px 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+            width: 100%;
+        }
+
+        /* Flaga w prawym górnym rogu */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 0.8s ease 0.6s;
+            cursor: pointer;
+            z-index: 30;
+        }
+
+        .language-switcher.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .flag {
+            width: 40px;
+            height: 26px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .flag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .flag.uk {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Crect width='60' height='30' fill='%23012169'/%3E%3Cg stroke='%23fff'%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke-width='6'/%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke='%23C8102E' stroke-width='2'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='m30,0v30M0,15h60' stroke-width='10'/%3E%3Cpath d='m30,0v30M0,15h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .flag.pl {
+            background: linear-gradient(to bottom, #fff 50%, #DC143C 50%);
+        }
+
+        /* Menu po lewej stronie - About i Waste Framework */
+        .left-menu {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) translateX(-100%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 20;
+            transition: transform 1s ease;
+        }
+
+        .left-menu.animate-in {
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .menu-item {
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: inline-block;
+            white-space: nowrap;
+            width: fit-content;
+            position: relative;
+        }
+
+        /* Lewe menu - prostokątne z lewej strony, zaokrąglone z prawej */
+        .left-menu .menu-item {
+            border-radius: 0 25px 25px 0;
+            padding-left: 30px;
+            margin-left: 0;
+        }
+
+        /* Prawe menu - prostokątne z prawej strony, zaokrąglone z lewej */
+        .right-menu .menu-item {
+            border-radius: 25px 0 0 25px;
+            padding-right: 30px;
+            margin-right: 0;
+        }
+
+        .menu-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Animacja wjazdu z lewej - powiększenie bez przesuwania */
+        .left-menu .menu-item:hover {
+            transform: scale(1.05);
+            transform-origin: left center;
+        }
+
+        /* Animacja wjazdu z prawej - powiększenie bez przesuwania */
+        .right-menu .menu-item:hover {
+            transform: scale(1.05);
+            transform-origin: right center;
+        }
+
+        .menu-item.large {
+            font-size: 14px;
+            padding: 15px 30px;
+        }
+
+        /* Specjalne style dla dużego przycisku z lewej */
+        .left-menu .menu-item.large {
+            padding-left: 40px;
+        }
+
+        /* Specjalne style dla dużego przycisku z prawej */
+        .right-menu .menu-item.large {
+            padding-right: 40px;
+        }
+
+        /* Menu po prawej stronie - TYLKO Technology i Contact */
+        .right-menu {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%) translateX(100%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-end;
+            z-index: 20;
+            transition: transform 1s ease;
+        }
+
+        .right-menu.animate-in {
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Logo w centrum */
+        .logo-container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(50px) scale(0.8);
+            transition: all 1.2s ease;
+        }
+
+        .logo-container.animate-in {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .logo-pin {
+            width: 472px;
+            height: 607px;
+            position: relative;
+            margin: 0 auto 20px;
+            cursor: pointer;
+            perspective: 1000px;
+            overflow: visible;
+            padding: 45px;
+        }
+
+        /* Kontener na logo */
+        .logo-image {
+            width: calc(100% - 90px);
+            height: calc(100% - 90px);
+            position: relative;
+            margin: 45px;
+            transition: all 0.1s ease;
+            background-image: url('logo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform-origin: center center;
+            transform-style: preserve-3d;
+            transform: rotateY(0deg);
+        }
+
+        .logo-pin:hover .logo-image {
+            transform: scale(1.02);
+        }
+
+        /* Pozycjonowanie oka - czarna kropka */
+        .eye-container {
+            position: absolute;
+            top: 29%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72px;
+            height: 72px;
+            pointer-events: none;
+            transform-style: preserve-3d;
+        }
+
+        /* Czarna kropka - oko */
+        .eye-pupil {
+            width: 18px;
+            height: 18px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Tytuł */
+        .logo-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Motto */
+        .logo-motto {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+            font-style: normal;
+            font-weight: 300;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Animacja pojedynczych elementów menu z opóźnieniem */
+        .left-menu .menu-item {
+            transform: translateX(-50px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .left-menu.animate-in .menu-item:nth-child(1) {
+            transition-delay: 0.2s;
+        }
+
+        .left-menu.animate-in .menu-item:nth-child(2) {
+            transition-delay: 0.3s;
+        }
+
+        .left-menu.animate-in .menu-item {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .right-menu .menu-item {
+            transform: translateX(50px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        .right-menu.animate-in .menu-item:nth-child(1) {
+            transition-delay: 0.2s;
+        }
+
+        .right-menu.animate-in .menu-item:nth-child(2) {
+            transition-delay: 0.3s;
+        }
+
+        .right-menu.animate-in .menu-item {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* Klasa do tymczasowego wyłączenia przejść przy resetowaniu animacji */
+        .no-transitions, .no-transitions * {
+            transition: none !important;
+        }
+
+        /* Efekt fade podczas zmiany języka */
+        .language-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .language-transition.fade-out {
+            opacity: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .left-menu {
+                position: fixed;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%) translateX(-100%);
+                z-index: 20;
+            }
+
+            .left-menu.animate-in {
+                transform: translateY(-50%) translateX(0);
+            }
+
+            .right-menu {
+                position: fixed;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%) translateX(100%);
+                z-index: 20;
+            }
+
+            .right-menu.animate-in {
+                transform: translateY(-50%) translateX(0);
+            }
+
+            .menu-item {
+                font-size: 10px;
+                padding: 10px 15px;
+                letter-spacing: 0.5px;
+            }
+
+            .left-menu .menu-item {
+                padding-left: 20px;
+            }
+
+            .right-menu .menu-item {
+                padding-right: 20px;
+            }
+
+            .language-switcher {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 30;
+            }
+
+            .logo-pin {
+                width: 288px;
+                height: 486px;
+                padding: 36px;
+            }
+
+            .logo-title {
+                font-size: 36px;
+            }
+
+            .container {
+                padding: 20px 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Przełącznik języka -->
+        <div class="language-switcher" id="languageSwitcher">
+            <div class="flag uk" id="languageFlag"></div>
+        </div>
+
+        <!-- Menu po lewej - About i Waste Framework -->
+        <nav class="left-menu" id="leftMenu">
+            <a href="about.html" class="menu-item" data-en="About" data-pl="O nas">O nas</a>
+            <a href="framework.html" class="menu-item" data-en="Waste Framework" data-pl="Framework Odpadów">Framework Odpadów</a>
+        </nav>
+
+        <!-- Logo w centrum -->
+        <div class="logo-container" id="logoContainer">
+            <div class="logo-pin" id="logoPinezka">
+                <div class="logo-image" id="logoImage"></div>
+            </div>
+            <h1 class="logo-title">TrashCloud</h1>
+            <p class="logo-motto" id="logoMotto" 
+               data-en="One person's trash is another person's treasure!" 
+               data-pl="Śmieci jednej osoby to skarb drugiej!">
+               Śmieci jednej osoby to skarb drugiej!
+            </p>
+        </div>
+
+        <!-- Menu po prawej - TYLKO Technology i Contact -->
+        <nav class="right-menu" id="rightMenu">
+            <a href="technology.html" class="menu-item" data-en="Technology" data-pl="Technologia">Technologia</a>
+            <a href="contact.html" class="menu-item" data-en="Contact Us" data-pl="Kontakt">Kontakt</a>
+        </nav>
+    </div>
+
+    <script>
+        // Globalna zmienna języka - synchronizacja z localStorage
+        let currentLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+
+        // Tłumaczenia
+        const translations = {
+            en: {
+                title: "TrashCloud",
+                motto: "One person's trash is another person's treasure!",
+                about: "About",
+                wasteFramework: "Waste Framework",
+                technology: "Technology", 
+                contact: "Contact Us"
+            },
+            pl: {
+                title: "TrashCloud",
+                motto: "Śmieci jednej osoby to skarb drugiej!",
+                about: "O nas",
+                wasteFramework: "Framework Odpadów", 
+                technology: "Technologia",
+                contact: "Kontakt"
+            }
+        };
+
+        // Przełączanie języka
+        function switchLanguage() {
+            const container = document.querySelector('.container');
+            const flag = document.getElementById('languageFlag');
+            
+            // Efekt fade out NAJPIERW
+            container.classList.add('language-transition', 'fade-out');
+            
+            setTimeout(() => {
+                // Zmiana języka (podczas gdy strona jest niewidoczna)
+                currentLanguage = currentLanguage === 'pl' ? 'en' : 'pl';
+                
+                // Zapisz w localStorage do synchronizacji z innymi stronami
+                localStorage.setItem('trashcloud-language', currentLanguage);
+                
+                // Zmiana flagi - gdy język polski, pokaż flagę UK (do przełączenia na angielski)
+                if (currentLanguage === 'pl') {
+                    flag.className = 'flag uk';
+                    document.documentElement.lang = 'pl';
+                } else {
+                    flag.className = 'flag pl';
+                    document.documentElement.lang = 'en';
+                }
+                
+                // Aktualizacja tekstów (podczas fade out)
+                updateTexts();
+                
+                // Reset animacji bez pokazywania strony
+                animatePageEntry({ reset: true });
+                
+                // Krótka pauza, potem jednoczesny fade in + animacja wejścia
+                setTimeout(() => {
+                    container.classList.remove('fade-out'); // Fade in
+                    
+                    // Natychmiast uruchom animację wejścia (bez dodatkowego opóźnienia)
+                    const leftMenu = document.getElementById('leftMenu');
+                    const rightMenu = document.getElementById('rightMenu');
+                    const logoContainer = document.getElementById('logoContainer');
+                    const languageSwitcher = document.getElementById('languageSwitcher');
+                    
+                    setTimeout(() => { leftMenu.classList.add('animate-in'); }, 200);
+                    setTimeout(() => { rightMenu.classList.add('animate-in'); }, 400);
+                    setTimeout(() => { logoContainer.classList.add('animate-in'); }, 100);
+                    setTimeout(() => { languageSwitcher.classList.add('animate-in'); }, 800);
+                }, 50);
+            }, 300);
+            
+            setTimeout(() => {
+                container.classList.remove('language-transition');
+            }, 1200);
+        }
+
+        // Aktualizacja tekstów na stronie
+        function updateTexts() {
+            const motto = document.getElementById('logoMotto');
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            // Aktualizacja motto
+            motto.textContent = translations[currentLanguage].motto;
+            
+            // Aktualizacja elementów menu
+            menuItems.forEach(item => {
+                const key = currentLanguage === 'en' ? 'data-en' : 'data-pl';
+                if (item.hasAttribute(key)) {
+                    item.textContent = item.getAttribute(key);
+                }
+            });
+        }
+
+        // 3D tilt – tylko obracanie w prawo i lewo (rotateY)
+        function initHorizontalRotation() {
+            const logoImage = document.getElementById('logoImage');
+            
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX;
+                const windowWidth = window.innerWidth;
+                const normalizedX = (mouseX / windowWidth) * 2 - 1;
+                const maxTilt = 25;
+                const rotateY = normalizedX * maxTilt;
+                
+                logoImage.style.transform = `rotateY(${rotateY}deg)`;
+            });
+            
+            document.addEventListener('mouseleave', () => {
+                logoImage.style.transform = 'rotateY(0deg)';
+            });
+        }
+
+        // Paralaksa tła
+        function initParallax() {
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+            });
+        }
+
+        // Hover gradient dla menu
+        function initMenuAnimations() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.background = 'linear-gradient(135deg, #9CCC65, #7CB342)';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    item.style.background = 'linear-gradient(135deg, #8BC34A, #689F38)';
+                });
+            });
+        }
+
+        // Uniwersalna funkcja odtwarzająca animację wejścia
+        function animatePageEntry(options = { reset: false }) {
+            const leftMenu = document.getElementById('leftMenu');
+            const rightMenu = document.getElementById('rightMenu');
+            const logoContainer = document.getElementById('logoContainer');
+            const languageSwitcher = document.getElementById('languageSwitcher');
+
+            const targets = [leftMenu, rightMenu, logoContainer, languageSwitcher];
+
+            if (options.reset) {
+                targets.forEach(el => el.classList.add('no-transitions'));
+                targets.forEach(el => el.classList.remove('animate-in'));
+                void document.body.offsetWidth;
+                targets.forEach(el => el.classList.remove('no-transitions'));
+            }
+
+            setTimeout(() => { leftMenu.classList.add('animate-in'); }, 200);
+            setTimeout(() => { rightMenu.classList.add('animate-in'); }, 400);
+            setTimeout(() => { logoContainer.classList.add('animate-in'); }, 100);
+            setTimeout(() => { languageSwitcher.classList.add('animate-in'); }, 800);
+        }
+
+        // Inicjalizacja po załadowaniu DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pobierz zapisany język z localStorage
+            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+            currentLanguage = savedLanguage;
+            
+            // Ustaw flagę zgodnie z aktualnym językiem
+            const flag = document.getElementById('languageFlag');
+            if (currentLanguage === 'pl') {
+                flag.className = 'flag uk'; // pokaż UK flag (do przełączenia na angielski)
+                document.documentElement.lang = 'pl';
+            } else {
+                flag.className = 'flag pl'; // pokaż PL flag (do przełączenia na polski)
+                document.documentElement.lang = 'en';
+                updateTexts(); // zaktualizuj teksty jeśli język angielski
+            }
+            
+            const logoImage = document.getElementById('logoImage');
+            logoImage.style.transform = 'rotateY(0deg)';
+            logoImage.style.filter = 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))';
+
+            // Pierwsze wejście
+            animatePageEntry({ reset: false });
+            
+            initHorizontalRotation();
+            initParallax();
+            initMenuAnimations();
+            
+            // Kliknięcie na logo
+            const logoPin = document.getElementById('logoPinezka');
+            logoPin.addEventListener('click', () => {
+                logoPin.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    logoPin.style.transform = 'scale(1)';
+                }, 150);
+            });
+
+            // Obsługa przełączania języka
+            const languageSwitcher = document.getElementById('languageSwitcher');
+            languageSwitcher.addEventListener('click', switchLanguage);
+        });
+
+        // Powrót z bfcache
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                // Synchronizuj język z localStorage przy powrocie
+                const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+                if (savedLanguage !== currentLanguage) {
+                    currentLanguage = savedLanguage;
+                    const flag = document.getElementById('languageFlag');
+                    
+                    if (currentLanguage === 'pl') {
+                        flag.className = 'flag uk';
+                        document.documentElement.lang = 'pl';
+                    } else {
+                        flag.className = 'flag pl';
+                        document.documentElement.lang = 'en';
+                    }
+                    updateTexts();
+                }
+                
+                animatePageEntry({ reset: true });
+            }
+        });
+    </script>
+</body>
+</html>

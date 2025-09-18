@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrashCloud - About</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f0f0f0 100%) !important;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            line-height: 1.6;
+        }
+
+        /* Wzór w tle - subtelne linie - z wymuszoną pozycją */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(45deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(-45deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0px 0px;
+            pointer-events: none;
+            z-index: -1;
+            will-change: transform;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Back button in top left */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            padding: 12px 25px 12px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 0 25px 25px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateX(-100%);
+            animation: slideInFromLeft 1s ease 0.6s forwards;
+        }
+
+        .back-button:hover {
+            transform: translateX(0) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #9CCC65, #7CB342);
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Language switcher in top right */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 0.8s ease 0.8s;
+            cursor: pointer;
+            z-index: 30;
+        }
+
+        .language-switcher.animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .flag {
+            width: 40px;
+            height: 26px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .flag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .flag.uk {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Crect width='60' height='30' fill='%23012169'/%3E%3Cg stroke='%23fff'%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke-width='6'/%3E%3Cpath d='m0,0 60,30M60,0 0,30' stroke='%23C8102E' stroke-width='2'/%3E%3C/g%3E%3Cg stroke='%23fff'%3E%3Cpath d='m30,0v30M0,15h60' stroke-width='10'/%3E%3Cpath d='m30,0v30M0,15h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .flag.pl {
+            background: linear-gradient(to bottom, #fff 50%, #DC143C 50%);
+        }
+
+        /* Main content */
+        .about-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 1s ease 0.2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        .mission-statement {
+            font-size: 20px;
+            color: #444;
+            margin-bottom: 50px;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(139, 195, 74, 0.15), rgba(104, 159, 56, 0.1));
+            border-radius: 15px;
+            border-left: 5px solid #8BC34A;
+            font-weight: 500;
+            line-height: 1.7;
+        }
+
+        .benefits-section {
+            margin-top: 50px;
+        }
+
+        .benefits-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .benefit-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            position: relative;
+            border-left: 6px solid #8BC34A;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .benefit-item:nth-child(1) { animation-delay: 0.4s; }
+        .benefit-item:nth-child(2) { animation-delay: 0.6s; }
+        .benefit-item:nth-child(3) { animation-delay: 0.8s; }
+        .benefit-item:nth-child(4) { animation-delay: 1.0s; }
+        .benefit-item:nth-child(5) { animation-delay: 1.2s; }
+
+        .benefit-item:hover {
+            transform: translateX(10px) translateY(0);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .benefit-number {
+            position: absolute;
+            left: -18px;
+            top: -12px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #8BC34A, #689F38);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .benefit-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            margin-left: 20px;
+        }
+
+        .benefit-description {
+            font-size: 16px;
+            color: #444;
+            margin-left: 20px;
+            line-height: 1.6;
+        }
+
+        /* Floating elements */
+        .floating-element {
+            position: absolute;
+            background: rgba(139, 195, 74, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 10%;
+            right: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            bottom: 15%;
+            left: 5%;
+            animation-delay: 3s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 20%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(-10px) rotate(240deg);
+            }
+        }
+
+        /* Language transition effects */
+        .language-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .language-transition.fade-out {
+            opacity: 0;
+        }
+
+        .no-transitions, .no-transitions * {
+            transition: none !important;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 60px 15px 20px;
+            }
+
+            .about-content {
+                padding: 25px;
+                margin-top: 20px;
+            }
+
+            .page-title {
+                font-size: 36px;
+                margin-bottom: 30px;
+            }
+
+            .mission-statement {
+                font-size: 18px;
+                padding: 25px;
+                margin-bottom: 40px;
+            }
+
+            .benefit-item {
+                padding: 20px;
+            }
+
+            .benefit-title {
+                font-size: 16px;
+                margin-left: 15px;
+            }
+
+            .benefit-description {
+                font-size: 15px;
+                margin-left: 15px;
+            }
+
+            .floating-element {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Floating decorative elements -->
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+
+        <!-- Back button -->
+        <a href="index.html" class="back-button" 
+           data-en="Back to Home" 
+           data-pl="Powrót do strony głównej">Powrót do strony głównej</a>
+
+        <!-- Language switcher -->
+        <div class="language-switcher" id="languageSwitcher">
+            <div class="flag uk" id="languageFlag"></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="about-content">
+            <h1 class="page-title" data-en="About Us" data-pl="O nas">O nas</h1>
+            
+            <div class="mission-statement"
+                 data-en="Our mission is to introduce as many unwanted items as possible back into circulation and upcycling, so that together we can create cleaner cities, save resources and act for our planet."
+                 data-pl="Naszą misją jest wprowadzanie jak największej ilości niechcianych przedmiotów do ponownego obiegu i upcyclingu, dzięki czemu wspólnie możemy tworzyć czystsze miasta, oszczędzać zasoby i działać na rzecz naszej planety.">
+                Naszą misją jest wprowadzanie jak największej ilości niechcianych przedmiotów do ponownego obiegu i upcyclingu, dzięki czemu wspólnie możemy tworzyć czystsze miasta, oszczędzać zasoby i działać na rzecz naszej planety.
+            </div>
+
+            <div class="benefits-section">
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <div class="benefit-number">1</div>
+                        <div class="benefit-title"
+                             data-en="Alternative to disposal"
+                             data-pl="Alternatywa dla wyrzucania">Alternatywa dla wyrzucania</div>
+                        <div class="benefit-description"
+                             data-en="TrashCloud gives second life to items that instead of going to landfill can return to circulation and gain new value."
+                             data-pl="TrashCloud daje drugie życie przedmiotom, które zamiast na wysypisko mogą wrócić do obiegu i zyskać nową wartość.">
+                            TrashCloud daje drugie życie przedmiotom, które zamiast na wysypisko mogą wrócić do obiegu i zyskać nową wartość.
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-number">2</div>
+                        <div class="benefit-title"
+                             data-en="Scalability and adaptation"
+                             data-pl="Skalowalność i adaptacja">Skalowalność i adaptacja</div>
+                        <div class="benefit-description"
+                             data-en="The system is scalable and can be adapted to different urban conditions, regardless of the size and specificity of a given community."
+                             data-pl="System jest skalowalny i może być dostosowany do różnych warunków miejskich, niezależnie od wielkości i specyfiki danej społeczności.">
+                            System jest skalowalny i może być dostosowany do różnych warunków miejskich, niezależnie od wielkości i specyfiki danej społeczności.
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-number">3</div>
+                        <div class="benefit-title"
+                             data-en="CO₂ emission reduction"
+                             data-pl="Ograniczenie emisji CO₂">Ograniczenie emisji CO₂</div>
+                        <div class="benefit-description"
+                             data-en="Each collected and reused item means tens, sometimes hundreds of kilograms of CO₂ less in the atmosphere."
+                             data-pl="Każdy zebrany i ponownie użyty przedmiot to dziesiątki, a czasem setki kilogramów CO₂ mniej w atmosferze.">
+                            Każdy zebrany i ponownie użyty przedmiot to dziesiątki, a czasem setki kilogramów CO₂ mniej w atmosferze.
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-number">4</div>
+                        <div class="benefit-title"
+                             data-en="Zero additional waste"
+                             data-pl="Zero dodatkowych odpadów">Zero dodatkowych odpadów</div>
+                        <div class="benefit-description"
+                             data-en="TrashCloud does not generate additional waste - it helps organize existing waste and direct it for reuse."
+                             data-pl="TrashCloud nie generuje kolejnych śmieci - pomaga uporządkować już istniejące i skierować je do ponownego użycia.">
+                            TrashCloud nie generuje kolejnych śmieci - pomaga uporządkować już istniejące i skierować je do ponownego użycia.
+                        </div>
+                    </div>
+
+                    <div class="benefit-item">
+                        <div class="benefit-number">5</div>
+                        <div class="benefit-title"
+                             data-en="Environmentally and people-friendly"
+                             data-pl="Przyjazny dla środowiska i ludzi">Przyjazny dla środowiska i ludzi</div>
+                        <div class="benefit-description"
+                             data-en="TrashCloud is not just about less waste and emissions - it's also about cleaner cities, better quality of life and conscious choices of residents."
+                             data-pl="TrashCloud to nie tylko mniej odpadów i emisji - to też czystsze miasta, lepsza jakość życia i świadome wybory mieszkańców.">
+                            TrashCloud to nie tylko mniej odpadów i emisji - to też czystsze miasta, lepsza jakość życia i świadome wybory mieszkańców.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globalna zmienna języka - synchronizacja z localStorage
+        let currentLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+
+        // Przełączanie języka
+        function switchLanguage() {
+            const container = document.querySelector('.container');
+            const flag = document.getElementById('languageFlag');
+            
+            container.classList.add('language-transition', 'fade-out');
+            
+            setTimeout(() => {
+                // Przełącz język
+                currentLanguage = currentLanguage === 'pl' ? 'en' : 'pl';
+                
+                // Zapisz język w localStorage
+                localStorage.setItem('trashcloud-language', currentLanguage);
+                
+                // Ustaw flagę - gdy język polski, pokaż flagę UK
+                if (currentLanguage === 'pl') {
+                    flag.className = 'flag uk';
+                    document.documentElement.lang = 'pl';
+                } else {
+                    flag.className = 'flag pl';
+                    document.documentElement.lang = 'en';
+                }
+                
+                updateTexts();
+                
+                setTimeout(() => {
+                    container.classList.remove('fade-out');
+                }, 50);
+            }, 300);
+            
+            setTimeout(() => {
+                container.classList.remove('language-transition');
+            }, 1200);
+        }
+
+        // Aktualizacja tekstów
+        function updateTexts() {
+            const elementsWithData = document.querySelectorAll('[data-en][data-pl]');
+            
+            elementsWithData.forEach(element => {
+                const key = currentLanguage === 'en' ? 'data-en' : 'data-pl';
+                if (element.hasAttribute(key)) {
+                    element.textContent = element.getAttribute(key);
+                }
+            });
+        }
+
+        // Parallax effect for background - PRZYWRÓCONE
+        function initParallax() {
+            // Set initial background position to prevent jumping
+            document.body.style.backgroundPosition = '0px 0px';
+            
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                
+                document.body.style.backgroundPosition = `${moveX}px ${moveY}px`;
+            });
+        }
+
+        // Add hover effects to floating elements
+        function initFloatingElements() {
+            const floatingElements = document.querySelectorAll('.floating-element');
+            
+            document.addEventListener('mousemove', (e) => {
+                floatingElements.forEach((element, index) => {
+                    const rect = element.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    const deltaX = e.clientX - centerX;
+                    const deltaY = e.clientY - centerY;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    if (distance < 150) {
+                        const moveX = (deltaX / distance) * -10;
+                        const moveY = (deltaY / distance) * -10;
+                        element.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                    } else {
+                        element.style.transform = 'translate(0, 0)';
+                    }
+                });
+            });
+        }
+
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pobierz zapisany język z localStorage
+            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+            currentLanguage = savedLanguage;
+            
+            // Ustaw flagę zgodnie z aktualnym językiem
+            const flag = document.getElementById('languageFlag');
+            if (currentLanguage === 'pl') {
+                flag.className = 'flag uk';
+                document.documentElement.lang = 'pl';
+            } else {
+                flag.className = 'flag pl';
+                document.documentElement.lang = 'en';
+                updateTexts();
+            }
+
+            initParallax();
+            initFloatingElements();
+            
+            // Obsługa przełączania języka
+            document.getElementById('languageSwitcher').addEventListener('click', switchLanguage);
+            
+            // Start animacji po załadowaniu
+            setTimeout(() => {
+                document.querySelector('.language-switcher').classList.add('animate-in');
+            }, 800);
+        });
+
+        // Synchronizacja języka przy powrocie
+        window.addEventListener('pageshow', (event) => {
+            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+            if (savedLanguage !== currentLanguage) {
+                currentLanguage = savedLanguage;
+                const flag = document.getElementById('languageFlag');
+                
+                if (currentLanguage === 'pl') {
+                    flag.className = 'flag uk';
+                    document.documentElement.lang = 'pl';
+                } else {
+                    flag.className = 'flag pl';
+                    document.documentElement.lang = 'en';
+                }
+                updateTexts();
+            }
+        });
+    </script>
+</body>
+</html>
