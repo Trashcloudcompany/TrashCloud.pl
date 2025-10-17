@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #e0e0e0 100%) !important;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 50%, #f0f0f0 100%) !important;
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
@@ -35,8 +35,10 @@
                 linear-gradient(45deg, rgba(255,255,255,0.1) 1px, transparent 1px),
                 linear-gradient(-45deg, rgba(255,255,255,0.1) 1px, transparent 1px);
             background-size: 20px 20px;
+            background-position: 0px 0px;
             pointer-events: none;
             z-index: -1;
+            will-change: transform;
         }
 
         .container {
@@ -464,14 +466,14 @@
 
             <!-- Global Waste Prediction -->
             <div class="statistic-card">
-                <div class="main-statistic">2,12→3,79</div>
+                <div class="main-statistic">2,12 → 3,79</div>
                 <div class="secondary-statistic"
                      data-en="billion tons"
                      data-pl="miliardów ton">miliardów ton</div>
                 <div class="statistic-description"
-                     data-en="of waste globally according to predictions between 2020 and 2050"
-                     data-pl="odpadów globalnie według predykcji między 2020 a 2050 rokiem">
-                    odpadów globalnie według predykcji między 2020 a 2050 rokiem
+                     data-en="of waste globally - predicted growth between 2020 and 2050"
+                     data-pl="odpadów globalnie to prognozowany wzrost między 2020 a 2050 rokiem">
+                    odpadów globalnie to prognozowany wzrost między 2020 a 2050 rokiem
                 </div>
                 <div class="statistic-source"
                      data-en="Source: UN Global Waste Management 2024"
@@ -484,9 +486,9 @@
         <!-- Additional content section -->
         <div class="content-section">
             <p class="content-text" id="contentText1"
-               data-en="Throughout Europe, and especially in its eastern part, waste management still relies primarily on landfilling. This means that huge amounts of materials that could be reused or recycled permanently lose their value, ending up in the ground instead of returning to circulation."
-               data-pl="W całej Europie, a szczególnie w jej wschodniej części, gospodarka odpadami wciąż opiera się przede wszystkim na składowaniu. Oznacza to, że ogromne ilości materiałów, które mogłyby zostać ponownie wykorzystane lub przetworzone, bezpowrotnie tracą swoją wartość, lądując w ziemi zamiast wracać do obiegu.">
-                W całej Europie, a szczególnie w jej wschodniej części, gospodarka odpadami wciąż opiera się przede wszystkim na składowaniu. Oznacza to, że ogromne ilości materiałów, które mogłyby zostać ponownie wykorzystane lub przetworzone, bezpowrotnie tracą swoją wartość, lądując w ziemi zamiast wracać do obiegu.
+               data-en="Throughout Europe, and especially in its eastern part, waste management still relies significantly on landfilling. This means that huge amounts of materials that could be reused or recycled permanently lose their value, instead of returning to circulation."
+               data-pl="W całej Europie, a szczególnie w jej wschodniej części, gospodarka odpadami wciąż opiera się w znacznym stopniu na składowaniu. Oznacza to, że ogromne ilości materiałów, które mogłyby zostać ponownie wykorzystane lub przetworzone, bezpowrotnie tracą swoją wartość, zamiast wracać do obiegu.">
+                W całej Europie, a szczególnie w jej wschodniej części, gospodarka odpadami wciąż opiera się w znacznym stopniu na składowaniu. Oznacza to, że ogromne ilości materiałów, które mogłyby zostać ponownie wykorzystane lub przetworzone, bezpowrotnie tracą swoją wartość, zamiast wracać do obiegu.
             </p>
             <p class="content-text" id="contentText2"
                data-en="At the same time, there is great potential hidden in bulky waste – these are often items that are still functional or suitable for repair, conversion or use in another way. Furniture, household appliances, home furnishings or building materials are resources that in many cases could find a second life."
@@ -502,8 +504,13 @@
     </div>
 
     <script>
-        // Globalna zmienna języka - synchronizacja z localStorage
-        let currentLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+        // Globalna zmienna języka - synchronizacja z localStorage z obsługą błędów
+        let currentLanguage = 'pl';
+        try {
+            currentLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+        } catch (e) {
+            console.warn('localStorage niedostępny:', e);
+        }
 
         // Przełączanie języka
         function switchLanguage() {
@@ -516,8 +523,12 @@
                 // Przełącz język
                 currentLanguage = currentLanguage === 'pl' ? 'en' : 'pl';
                 
-                // Zapisz język w localStorage
-                localStorage.setItem('trashcloud-language', currentLanguage);
+                // Zapisz język w localStorage z obsługą błędów
+                try {
+                    localStorage.setItem('trashcloud-language', currentLanguage);
+                } catch (e) {
+                    console.warn('Nie można zapisać do localStorage:', e);
+                }
                 
                 // Ustaw flagę - gdy język polski, pokaż flagę UK
                 if (currentLanguage === 'pl') {
@@ -594,6 +605,9 @@
 
         // Parallax effect
         function initParallax() {
+            // Set initial background position to prevent jumping
+            document.body.style.backgroundPosition = '0px 0px';
+            
             document.addEventListener('mousemove', (e) => {
                 const moveX = (e.clientX - window.innerWidth / 2) * 0.005;
                 const moveY = (e.clientY - window.innerHeight / 2) * 0.005;
@@ -604,9 +618,14 @@
 
         // Inicjalizacja
         document.addEventListener('DOMContentLoaded', () => {
-            // Pobierz zapisany język z localStorage
-            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
-            currentLanguage = savedLanguage;
+            // Pobierz zapisany język z localStorage z obsługą błędów
+            try {
+                const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+                currentLanguage = savedLanguage;
+            } catch (e) {
+                console.warn('localStorage niedostępny:', e);
+                currentLanguage = 'pl';
+            }
             
             // Ustaw flagę i język zgodnie z aktualnym językiem
             const flag = document.getElementById('languageFlag');
@@ -643,14 +662,25 @@
 
         // Synchronizacja języka przy powrocie
         window.addEventListener('pageshow', (event) => {
-            const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
-            if (savedLanguage !== currentLanguage) {
-                currentLanguage = savedLanguage;
-                const flag = document.getElementById('languageFlag');
-                
-                if (currentLanguage === 'pl') {
-                    flag.className = 'flag uk';
-                    document.documentElement.lang = 'pl';
-                } else {
-                    flag.className = 'flag pl';
-                    document.
+            try {
+                const savedLanguage = localStorage.getItem('trashcloud-language') || 'pl';
+                if (savedLanguage !== currentLanguage) {
+                    currentLanguage = savedLanguage;
+                    const flag = document.getElementById('languageFlag');
+                    
+                    if (currentLanguage === 'pl') {
+                        flag.className = 'flag uk';
+                        document.documentElement.lang = 'pl';
+                    } else {
+                        flag.className = 'flag pl';
+                        document.documentElement.lang = 'en';
+                    }
+                    updateTexts();
+                }
+            } catch (e) {
+                console.warn('localStorage niedostępny przy powrocie:', e);
+            }
+        });
+    </script>
+</body>
+</html>
