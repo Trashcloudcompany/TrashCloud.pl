@@ -517,11 +517,15 @@
             const container = document.querySelector('.container');
             const flag = document.getElementById('languageFlag');
             
+            console.log('Przed zmianą - język:', currentLanguage, 'flaga:', flag.className);
+            
             container.classList.add('language-transition', 'fade-out');
             
             setTimeout(() => {
                 // Przełącz język
                 currentLanguage = currentLanguage === 'pl' ? 'en' : 'pl';
+                
+                console.log('Po zmianie - język:', currentLanguage);
                 
                 // Zapisz język w localStorage z obsługą błędów
                 try {
@@ -530,14 +534,16 @@
                     console.warn('Nie można zapisać do localStorage:', e);
                 }
                 
-                // Ustaw flagę - gdy język polski, pokaż flagę UK
+                // Ustaw flagę - gdy język polski, pokaż flagę UK (do przełączenia na angielski)
                 if (currentLanguage === 'pl') {
-                    flag.className = 'flag uk';
+                    flag.className = 'flag uk'; // język PL → pokaż UK flag
                     document.documentElement.lang = 'pl';
                 } else {
-                    flag.className = 'flag pl';
+                    flag.className = 'flag pl'; // język EN → pokaż PL flag
                     document.documentElement.lang = 'en';
                 }
+                
+                console.log('Nowa flaga:', flag.className);
                 
                 updateTexts();
                 resetAnimations();
@@ -565,9 +571,9 @@
             });
         }
 
-        // Reset animacji
+        // Reset animacji - BEZ resetowania flagi
         function resetAnimations() {
-            const animatedElements = document.querySelectorAll('.page-title, .statistic-card, .content-section, .back-button, .language-switcher');
+            const animatedElements = document.querySelectorAll('.page-title, .statistic-card, .content-section, .back-button');
             
             animatedElements.forEach(el => {
                 el.classList.add('no-transitions');
@@ -630,10 +636,10 @@
             // Ustaw flagę i język zgodnie z aktualnym językiem
             const flag = document.getElementById('languageFlag');
             if (currentLanguage === 'pl') {
-                flag.className = 'flag uk';
+                flag.className = 'flag uk'; // język PL → pokaż flagę UK (do zmiany na EN)
                 document.documentElement.lang = 'pl';
             } else {
-                flag.className = 'flag pl';
+                flag.className = 'flag pl'; // język EN → pokaż flagę PL (do zmiany na PL)
                 document.documentElement.lang = 'en';
                 updateTexts();
             }
@@ -669,10 +675,10 @@
                     const flag = document.getElementById('languageFlag');
                     
                     if (currentLanguage === 'pl') {
-                        flag.className = 'flag uk';
+                        flag.className = 'flag uk'; // język PL → pokaż UK flag
                         document.documentElement.lang = 'pl';
                     } else {
-                        flag.className = 'flag pl';
+                        flag.className = 'flag pl'; // język EN → pokaż PL flag
                         document.documentElement.lang = 'en';
                     }
                     updateTexts();
